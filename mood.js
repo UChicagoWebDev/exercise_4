@@ -1,49 +1,85 @@
 const bing_api_endpoint = "https://api.bing.microsoft.com/v7.0/images/search";
 const bing_api_key = BING_API_KEY
 
+
+function clearResults() {
+  const resultsContainer = document.getElementById('resultsImageContainer');
+  while (resultsContainer.firstChild) {
+    resultsContainer.removeChild(resultsContainer.firstChild);
+  }
+  const SuggestedSearchesContainer = document.getElementById('suggestion_list');
+  while (SuggestedSearchesContainer.firstChild) {
+    SuggestedSearchesContainer.removeChild(SuggestedSearchesContainer.firstChild);
+  }
+}
+
 function runSearch() {
-
-  // TODO: Clear the results pane before you run a new search
-
+  clearResults();
   openResultsPane();
 
-  // TODO: Build your query by combining the bing_api_endpoint and a query attribute
-  //  named 'q' that takes the value from the search bar input field.
+  let query = document.querySelector('.search input').value;
+  if (!query) return false;
 
   let request = new XMLHttpRequest();
+  request.open('GET', `${bing_api_endpoint}?q=${encodeURIComponent(query)}`);
+  request.setRequestHeader("Ocp-Apim-Subscription-Key", bing_api_key);
+  request.responseType = 'json';
+  request.onload = function() {
+    if (request.status >= 200 && request.status < 300) {
+      UpdateAllElements(request.response)
+    } else {
+      alert("search failed")
+    }
+  };
+  request.onerror = function() {alert("search failed")};
+  request.send();
 
-  // TODO: Construct the request object and add appropriate event listeners to
-  // handle responses. See:
-  // https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest_API/Using_XMLHttpRequest
-  //
-  //   - You'll want to specify that you want json as your response type
-  //   - Look for your data in event.target.response
-  //   - When adding headers, also include the commented out line below. See the API docs at:
-  // https://docs.microsoft.com/en-us/bing/search-apis/bing-image-search/reference/headers
-  //   - When you get your responses, add elements to the DOM in #resultsImageContainer to
-  //     display them to the user
-  //   - HINT: You'll need to ad even listeners to them after you add them to the DOM
-  //
-  // request.setRequestHeader("Ocp-Apim-Subscription-Key", bing_api_key);
+  return false;
+}
 
-  // TODO: Send the request
+function UpdateAllElements(response){
 
-  return false;  // Keep this; it keeps the browser from sending the event
-                  // further up the DOM chain. Here, we don't want to trigger
-                  // the default form submission behavior.
+  let container = document.getElementById('resultsImageContainer');
+  response.value.forEach(image => {
+    const imgDiv = document.createElement('div');
+    imgDiv.className = 'resultImage';
+    imgDiv.innerHTML = `<img src="${image.thumbnailUrl}" alt="${image.name}">`;
+    imgDiv.addEventListener('click', () => appendMoodBoard(image.contentUrl));
+    container.appendChild(imgDiv);
+  });
+
+  container = document.getElementById("suggestion_list");
+  response.relatedSearches.forEach(search => {
+    const SuggSearchDiv = document.createElement('li');
+    SuggSearchDiv.innerHTML = `${search.text}`;
+    container.appendChild(SuggSearchDiv);
+  });
+
+  const suggestions = document.querySelectorAll('.suggestions li');
+  suggestions.forEach(suggestion => {
+    suggestion.addEventListener('click', (e) => {
+      const query = e.target.innerText;
+      document.querySelector('.search input').value = query;
+      runSearch();
+    });
+  });
+}
+
+function appendMoodBoard(imgUrl) {
+  const board = document.getElementById('board');
+  const imgDiv = document.createElement('div');
+  imgDiv.className = 'savedImage';
+  imgDiv.innerHTML = `<img src="${imgUrl}">`;
+  board.appendChild(imgDiv);
 }
 
 function openResultsPane() {
-  // This will make the results pane visible.
   document.querySelector("#resultsExpander").classList.add("open");
 }
 
 function closeResultsPane() {
-  // This will make the results pane hidden again.
   document.querySelector("#resultsExpander").classList.remove("open");
 }
-
-// This will 
 document.querySelector("#runSearchButton").addEventListener("click", runSearch);
 document.querySelector(".search input").addEventListener("keypress", (e) => {
   if (e.key == "Enter") {runSearch()}
