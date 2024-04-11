@@ -98,7 +98,7 @@ h1 {
   transition: max-height ease 0.4s;
 }
 
-#results .closeButton {
+#closeResultsButton {
   display: block;
   text-align: right;
 }
