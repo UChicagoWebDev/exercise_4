@@ -47,24 +47,15 @@ function closeResultsPane() {
 }
 
 function addFakeResults() {
-  const fakeResults = [
-    "https://th-thumbnailer.cdn-si-edu.com/bgmkh2ypz03IkiRR50I-UMaqUQc=/1000x750/filters:no_upscale():focal(1061x707:1062x708)/https://tf-cmsv2-smithsonianmag-media.s3.amazonaws.com/filer_public/55/95/55958815-3a8a-4032-ac7a-ff8c8ec8898a/gettyimages-1067956982.jpg",
-    "https://t3.ftcdn.net/jpg/01/82/13/18/360_F_182131866_eDjFtBOUsEO5W91a78XHJ9C0xpnr6m3b.jpg",
-    "https://www.shutterstock.com/image-photo/cute-pet-kitten-on-clean-600nw-2315794797.jpg"
-  ]
-  const resultsImageContainer = document.querySelector("#resultsImageContainer");
-
-  resultsImageContainer.replaceChildren();
-
-  window.setTimeout(()=>{
-    fakeResults.forEach((r)=>{
-      let div = document.createElement("div");
-      div.classList.add("resultImage");
-      let img = document.createElement("img");
-      img.setAttribute("src", r);
-      div.appendChild(img);
-      resultsImageContainer.appendChild(div);
-    });
+  const c = document.getElementById("resultsImageContainer");
+  c.replaceChildren();
+  window.setTimeout(()=> {
+    const fakeResults = [...document.getElementById("fakeResults").children];
+    fakeResults.forEach((r) => {
+      const newResult = r.cloneNode(true);
+      newResult.addEventListener("click", ()=>{alert("Implement me!")});
+      c.appendChild(newResult);
+    })
   }, 2000);
 }
 
